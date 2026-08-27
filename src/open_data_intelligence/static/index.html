@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive dashboard for an open-data intelligence pipeline.">
+  <title>Open Data Intelligence</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar">
+    <a class="brand" href="/dashboard" aria-label="Open Data Intelligence dashboard">
+      <span class="brand-mark">OD</span>
+      <span>
+        <strong>Open Data Intelligence</strong>
+        <small>procurement relationship explorer</small>
+      </span>
+    </a>
+    <nav>
+      <a href="/docs" target="_blank" rel="noreferrer">API docs</a>
+      <a href="/openapi.json" target="_blank" rel="noreferrer">OpenAPI</a>
+      <span id="healthBadge" class="health-badge health-pending">
+        <i></i><span>connecting</span>
+      </span>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero panel">
+      <div class="hero-copy">
+        <span class="eyebrow">PORTFOLIO DEMO · FASTAPI + POSTGRESQL</span>
+        <h1>Turn raw procurement records into explainable signals.</h1>
+        <p>
+          A small end-to-end data pipeline: validation, normalization, entity resolution,
+          idempotent ingestion and relationship analytics.
+        </p>
+        <div class="hero-actions">
+          <button id="syncButton" class="primary-button">
+            <span>Load demo dataset</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <button id="refreshButton" class="secondary-button">Refresh dashboard</button>
+        </div>
+      </div>
+      <div class="pipeline-card" aria-label="Pipeline stages">
+        <div class="pipeline-step"><span>01</span><div><b>Ingest</b><small>validated fixtures</small></div></div>
+        <div class="pipeline-line"></div>
+        <div class="pipeline-step"><span>02</span><div><b>Resolve</b><small>stable entities</small></div></div>
+        <div class="pipeline-line"></div>
+        <div class="pipeline-step"><span>03</span><div><b>Explain</b><small>traceable signals</small></div></div>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Dataset metrics">
+      <article class="metric-card">
+        <span>Organizations</span>
+        <strong id="organizationCount">—</strong>
+        <small>resolved legal entities</small>
+      </article>
+      <article class="metric-card">
+        <span>Procurements</span>
+        <strong id="procurementCount">—</strong>
+        <small>normalized records</small>
+      </article>
+      <article class="metric-card accent-card">
+        <span>Risk signals</span>
+        <strong id="signalCount">—</strong>
+        <small>explainable rule matches</small>
+      </article>
+      <article class="metric-card">
+        <span>Last sync</span>
+        <strong id="syncStatus" class="status-text">Not run</strong>
+        <small id="syncDetails">load fixtures to begin</small>
+      </article>
+    </section>
+
+    <section class="workspace-grid">
+      <article class="panel organizations-panel">
+        <div class="section-heading">
+          <div><span class="eyebrow">ENTITY INDEX</span><h2>Organizations</h2></div>
+          <label class="search-box">
+            <span class="sr-only">Search organizations</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+            <input id="organizationSearch" type="search" placeholder="Search name or code">
+          </label>
+        </div>
+        <div id="organizationList" class="organization-list empty-state">
+          <div><b>No entities loaded</b><span>Run the demo synchronization first.</span></div>
+        </div>
+      </article>
+
+      <article class="panel relationship-panel">
+        <div class="section-heading">
+          <div><span class="eyebrow">RELATIONSHIP VIEW</span><h2 id="relationshipTitle">Select an organization</h2></div>
+        </div>
+        <div id="relationshipSummary" class="relationship-summary empty-state compact">
+          <div><b>Nothing selected</b><span>Choose an organization to inspect its counterparties.</span></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel signals-panel">
+      <div class="section-heading">
+        <div><span class="eyebrow">EXPLAINABLE ANALYTICS</span><h2>Detected signals</h2></div>
+        <div class="filter-pills" id="signalFilters" role="group" aria-label="Filter risk signals">
+          <button class="active" data-filter="all">All</button>
+          <button data-filter="medium">Medium</button>
+          <button data-filter="low">Low</button>
+        </div>
+      </div>
+      <div id="signalList" class="signal-grid empty-state">
+        <div><b>No signals yet</b><span>Signals will appear after ingestion.</span></div>
+      </div>
+    </section>
+
+    <section class="panel procurements-panel">
+      <div class="section-heading">
+        <div><span class="eyebrow">NORMALIZED DATA</span><h2>Procurements</h2></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Title</th><th>Buyer</th><th>Supplier</th><th>Amount</th><th>Deadline</th></tr></thead>
+          <tbody id="procurementRows">
+            <tr><td colspan="6" class="table-empty">No procurement records loaded.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

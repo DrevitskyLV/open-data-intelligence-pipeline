@@ -1,0 +1,63 @@
+[
+  {
+    "external_id": "PROC-2026-001",
+    "title": "Network monitoring equipment",
+    "buyer": {"registration_code": "UA-500001", "name": "Municipal Energy Agency"},
+    "supplier": {"registration_code": "UA-100001", "name": "Nova Data Solutions LLC"},
+    "amount": "120000.00",
+    "currency": "UAH",
+    "announced_at": "2026-07-01T09:00:00+00:00",
+    "deadline_at": "2026-07-10T09:00:00+00:00"
+  },
+  {
+    "external_id": "PROC-2026-002",
+    "title": "Server maintenance services",
+    "buyer": {"registration_code": "UA 500001", "name": "Municipal Energy Agency"},
+    "supplier": {"registration_code": "UA100001", "name": "Nova Data Solutions, LLC"},
+    "amount": "145000.00",
+    "currency": "UAH",
+    "announced_at": "2026-07-05T09:00:00+00:00",
+    "deadline_at": "2026-07-07T09:00:00+00:00"
+  },
+  {
+    "external_id": "PROC-2026-003",
+    "title": "Backup storage subscription",
+    "buyer": {"registration_code": "UA500001", "name": "Municipal Energy Agency"},
+    "supplier": {"registration_code": "UA-100001", "name": "Nova Data Solutions Ltd"},
+    "amount": "98000.00",
+    "currency": "UAH",
+    "announced_at": "2026-07-10T09:00:00+00:00",
+    "deadline_at": "2026-07-20T09:00:00+00:00"
+  },
+  {
+    "external_id": "PROC-2026-004",
+    "title": "Office security system",
+    "buyer": {"registration_code": "UA-500001", "name": "Municipal Energy Agency"},
+    "supplier": {"registration_code": "UA-100002", "name": "Alpha Systems LLC"},
+    "amount": "215000.00",
+    "currency": "UAH",
+    "announced_at": "2026-07-15T09:00:00+00:00",
+    "deadline_at": "2026-07-25T09:00:00+00:00"
+  },
+  {
+    "external_id": "PROC-2026-005",
+    "title": "Medical data archive modernization",
+    "buyer": {"registration_code": "UA-500002", "name": "City Health Department"},
+    "supplier": {"registration_code": "UA-100003", "name": "Rapid Office Solutions"},
+    "amount": "1250000.00",
+    "currency": "UAH",
+    "announced_at": "2026-07-18T09:00:00+00:00",
+    "deadline_at": "2026-07-20T09:00:00+00:00"
+  },
+  {
+    "external_id": "PROC-2026-006",
+    "title": "Analytics dashboard development",
+    "buyer": {"registration_code": "UA-500002", "name": "City Health Department"},
+    "supplier": {"registration_code": "UA-100001", "name": "Nova Data Solutions LLC"},
+    "amount": "310000.00",
+    "currency": "UAH",
+    "announced_at": "2026-07-21T09:00:00+00:00",
+    "deadline_at": "2026-08-03T09:00:00+00:00"
+  }
+]
+
