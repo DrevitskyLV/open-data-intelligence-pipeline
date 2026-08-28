@@ -1,10 +1,13 @@
 # Open Data Intelligence Pipeline
 
 Independent portfolio project demonstrating idempotent ingestion, entity normalization,
-relationship discovery and explainable analytics over public-style procurement data.
+relationship discovery and explainable analytics over public procurement data.
 
-The repository uses synthetic fixtures and does not contain commercial code, client data,
-personal data or reverse-engineered company logic.
+The committed repository contains synthetic fixtures and no commercial code, client data,
+personal data or reverse-engineered company logic. An optional read-only connector to the official
+[Prozorro public API](https://prozorro.gov.ua/openprocurement) processes public legal names and
+registration identifiers at runtime. It retains award value and tender dates but deliberately
+discards contact details.
 
 ## Why this project exists
 
@@ -24,7 +27,8 @@ flowchart TD
 
 ## Current capabilities
 
-- Validated ingestion from deterministic JSON fixtures.
+- Validated ingestion from deterministic JSON fixtures or the official Prozorro API.
+- Async HTTP client with bounded concurrency, pagination, timeout and exponential retry.
 - Idempotent upserts keyed by stable external identifiers.
 - Organization resolution across differently formatted registration codes.
 - Normalized organization names for search and later fuzzy matching.
@@ -33,7 +37,8 @@ flowchart TD
   - high-value contract;
   - supplier concentration.
 - Aggregated buyer/supplier relationships.
-- Interactive dashboard for loading fixtures, searching entities and inspecting relationships.
+- Interactive dashboard for loading fixtures or live awards, searching entities and inspecting
+  relationships.
 - Search and filters through a documented REST API.
 - PostgreSQL in Docker, SQLite for zero-configuration local development.
 - Alembic migrations, pytest suite and GitHub Actions.
@@ -69,6 +74,17 @@ curl -X POST http://localhost:8000/api/v1/sync-runs \
 Run the same request again: `records_created` becomes `0`, while the database still contains
 six procurements. This demonstrates idempotent reprocessing.
 
+Load up to six recent awarded procurements from the public API:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/sync-runs \
+  -H "Content-Type: application/json" \
+  -d '{"source":"prozorro","limit":6}'
+```
+
+The live request is opt-in and requires internet access. It follows Prozorro pagination and scans
+recently modified tenders until it finds usable active awards.
+
 ## Local development
 
 ```bash
@@ -89,7 +105,7 @@ alembic upgrade head
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/v1/sync-runs` | Validate and ingest the fixture dataset |
+| `POST` | `/api/v1/sync-runs` | Ingest fixtures or recent Prozorro awards |
 | `GET` | `/api/v1/sync-runs/{id}` | Inspect synchronization status and counters |
 | `GET` | `/api/v1/organizations` | Search organizations by name or code |
 | `GET` | `/api/v1/organizations/{id}` | View organization summary |
@@ -118,16 +134,26 @@ over probabilistic name similarity. Fuzzy matching is listed as a later, reviewa
 Every signal contains a human-readable reason and links back to an organization or procurement.
 The project deliberately avoids pretending that deterministic rules are an ML risk score.
 
-### Synchronous v0.1 ingestion
+### Bounded live connector
 
-The first release executes a small deterministic dataset inside the request so reviewers can
-run the complete flow without operating a queue. The service boundary and `sync_runs` model are
-already present; moving execution to a Redis-backed worker is the first roadmap milestone.
+The connector reads the descending tender feed, follows `next_page.uri`, fetches tender details
+concurrently and maps only active awards. Requests retry HTTP 429 and 5xx responses with
+exponential backoff. Deterministic tests use `httpx.MockTransport`, so CI never depends on the
+availability or contents of the live API.
+
+### Request-scoped v0.1 ingestion
+
+The first release executes a small bounded dataset inside the request so reviewers can run the
+complete flow without operating a queue. Network I/O is asynchronous, but persistence still
+finishes before the response. The service boundary and `sync_runs` model are already present;
+moving execution to a Redis-backed worker is the first roadmap milestone.
 
 ## Repository structure
 
 ```text
 src/open_data_intelligence/
+├── connectors/
+│   └── prozorro.py         # Async public API client and source mapping
 ├── api.py                  # HTTP endpoints and query composition
 ├── config.py               # Environment-driven configuration
 ├── db.py                   # SQLAlchemy engine and session lifecycle

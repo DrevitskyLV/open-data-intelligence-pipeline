@@ -16,7 +16,7 @@ def rebuild_risk_signals(db: Session) -> int:
 
     for item in procurements:
         tender_days = (item.deadline_at - item.announced_at).total_seconds() / 86_400
-        if tender_days <= 3:
+        if 0 <= tender_days <= 3:
             db.add(
                 RiskSignal(
                     fingerprint=f"short-deadline:{item.external_id}",

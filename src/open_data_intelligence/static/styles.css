@@ -74,7 +74,7 @@ button { border: 0; cursor: pointer; }
 .primary-button svg { width: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 .secondary-button { color: var(--text); background: rgba(255,255,255,.045); border: 1px solid var(--line); }
 .primary-button:hover, .secondary-button:hover { transform: translateY(-2px); }
-.primary-button:disabled { opacity: .55; cursor: wait; transform: none; }
+.primary-button:disabled, .secondary-button:disabled { opacity: .55; cursor: wait; transform: none; }
 
 .pipeline-card { position: relative; z-index: 1; align-self: center; padding: 26px; border: 1px solid var(--line); background: rgba(3,12,10,.55); border-radius: 19px; }
 .pipeline-step { display: flex; align-items: center; gap: 15px; }
