@@ -1,7 +1,16 @@
 # Open Data Intelligence Pipeline
 
+[![CI](https://github.com/DrevitskyLV/open-data-intelligence-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/DrevitskyLV/open-data-intelligence-pipeline/actions/workflows/ci.yml)
+![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
 Independent portfolio project demonstrating idempotent ingestion, entity normalization,
 relationship discovery and explainable analytics over public procurement data.
+
+![Entity search and relationship analytics dashboard](docs/assets/dashboard-preview.png)
+
+_Entity search, aggregated relationships and a verified idempotent synchronization run._
 
 The committed repository contains synthetic fixtures and no commercial code, client data,
 personal data or reverse-engineered company logic. An optional read-only connector to the official
