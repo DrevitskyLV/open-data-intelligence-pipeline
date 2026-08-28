@@ -66,6 +66,13 @@ Open:
 - Swagger UI: http://localhost:8000/docs
 - Health: http://localhost:8000/api/v1/health
 
+### Container deployment contract
+
+The container applies pending Alembic migrations before starting Uvicorn and listens on the
+provider-supplied `PORT` value, falling back to `8000`. Set `DATABASE_URL` to a managed PostgreSQL
+connection string and `APP_ENV=production`; common `postgres://` and `postgresql://` URLs are
+normalized to the installed psycopg v3 driver automatically.
+
 ### One-click Windows preview
 
 If Python 3.12 is installed, double-click `start_demo.bat`. The script creates a local virtual
