@@ -10,22 +10,29 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, joinedload
 
 from open_data_intelligence.config import settings
+from open_data_intelligence.connectors.prozorro import ProzorroClient
 from open_data_intelligence.db import get_db
 from open_data_intelligence.models import Organization, Procurement, RiskSignal, SyncRun, SyncStatus
 from open_data_intelligence.schemas import (
     HealthRead,
     OrganizationDetail,
     OrganizationRead,
+    ProcurementInput,
     ProcurementRead,
     RelationshipRead,
     RiskSignalRead,
     SyncRunCreate,
     SyncRunRead,
 )
-from open_data_intelligence.services.ingestion import ingest_fixture
+from open_data_intelligence.services.ingestion import ingest_fixture, ingest_records
 
 router = APIRouter(prefix="/api/v1")
 DbSession = Annotated[Session, Depends(get_db)]
+
+
+async def fetch_prozorro_records(limit: int) -> list[ProcurementInput]:
+    async with ProzorroClient() as client:
+        return await client.fetch_awarded_procurements(limit=limit)
 
 
 @router.get("/health", response_model=HealthRead, tags=["system"])
@@ -39,13 +46,17 @@ def health() -> HealthRead:
     status_code=status.HTTP_201_CREATED,
     tags=["ingestion"],
 )
-def create_sync_run(payload: SyncRunCreate, db: DbSession) -> SyncRun:
+async def create_sync_run(payload: SyncRunCreate, db: DbSession) -> SyncRun:
     run = SyncRun(id=str(uuid4()), source=payload.source, status=SyncStatus.RUNNING)
     db.add(run)
     db.commit()
 
     try:
-        result = ingest_fixture(db)
+        if payload.source == "prozorro":
+            records = await fetch_prozorro_records(payload.limit)
+            result = ingest_records(db, records)
+        else:
+            result = ingest_fixture(db)
         completed_run = db.get(SyncRun, run.id)
         if completed_run is None:
             raise RuntimeError("Sync run disappeared during processing")

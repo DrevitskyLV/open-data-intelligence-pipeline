@@ -10,11 +10,14 @@ behind a simple API. The service validates procurement-style records, normalizes
 identifiers and names, performs idempotent upserts, creates explainable analytical signals and
 exposes relationships through FastAPI. PostgreSQL is used in the Docker environment, while
 SQLite keeps local setup simple. Alembic manages the schema, and pytest, Ruff, mypy and GitHub
-Actions provide automated quality checks.
+Actions provide automated quality checks. The optional Prozorro connector reads the official
+descending feed, follows cursor-style pagination and concurrently loads tender details. It maps
+only active awards and deliberately excludes public contact fields from persistence.
 
-The current fixture connector is deliberately deterministic. My next step would be a real
-paginated connector executed by a Redis-backed worker with retries, rate-limit handling and raw
-document preservation.
+The live connector is async and includes timeouts, bounded concurrency and retries for rate limits
+and transient server errors. It currently completes a small bounded sync inside the HTTP request;
+my next production step would be moving that work to a Redis-backed worker and preserving raw
+source documents in object storage.
 
 ## Code areas to understand
 
@@ -22,6 +25,7 @@ document preservation.
 | --- | --- | --- |
 | Dependency injection | `api.py`, `db.py` | Why one SQLAlchemy session is scoped to one request |
 | Validation | `schemas.py` | Why external input is parsed before persistence |
+| External API | `connectors/prozorro.py` | Pagination, timeout, retries, mapping and data minimization |
 | Idempotency | `services/ingestion.py` | Why stable `external_id` and registration codes prevent duplicates |
 | Entity resolution | `services/normalization.py` | Deterministic matching first, fuzzy matching later |
 | Analytics | `services/signals.py` | Why signals are explainable rules rather than an invented ML score |
@@ -30,11 +34,19 @@ document preservation.
 
 ## Questions you should be able to answer
 
-### Why is the first ingestion synchronous?
+### Why does ingestion still finish inside the request?
 
-The dataset is intentionally small and deterministic, so synchronous execution makes the whole
-flow easy for a reviewer to run. The `sync_runs` model and ingestion service boundary allow the
-same work to be moved to a worker without changing the public reporting model.
+The requested batch is intentionally small and bounded, so request-scoped completion makes the
+whole flow easy for a reviewer to run. The live HTTP calls themselves are asynchronous. The
+`sync_runs` model and ingestion service boundary allow the same orchestration to be moved to a
+worker without changing the public reporting model.
+
+### Why are live API tests mocked?
+
+An external dataset changes continuously and can be slow or temporarily unavailable. Connector
+tests use an in-memory HTTP transport to prove pagination, retry and mapping behavior
+deterministically. A separate manual smoke test verifies live compatibility without making CI
+flaky.
 
 ### What happens if two workers ingest the same record at once?
 
@@ -66,4 +78,3 @@ signals should be incrementally recalculated only for affected entities and peri
 This is an independent portfolio project inspired by common ingestion and open-data analysis
 problems. It contains synthetic data and no code or information from my confidential commercial
 project.
-

@@ -11,6 +11,7 @@ const state = {
 const elements = {
   healthBadge: document.querySelector("#healthBadge"),
   syncButton: document.querySelector("#syncButton"),
+  liveSyncButton: document.querySelector("#liveSyncButton"),
   refreshButton: document.querySelector("#refreshButton"),
   organizationCount: document.querySelector("#organizationCount"),
   procurementCount: document.querySelector("#procurementCount"),
@@ -207,35 +208,42 @@ function renderProcurements() {
   `).join("");
 }
 
-async function runSync() {
-  const originalLabel = elements.syncButton.querySelector("span").textContent;
+async function runSync(source, activeButton) {
+  const label = activeButton.querySelector("span");
+  const originalLabel = label.textContent;
   elements.syncButton.disabled = true;
-  elements.syncButton.querySelector("span").textContent = "Processing…";
+  elements.liveSyncButton.disabled = true;
+  label.textContent = source === "prozorro" ? "Fetching live data…" : "Processing…";
   elements.syncStatus.textContent = "Running";
-  elements.syncDetails.textContent = "validating and resolving entities";
+  elements.syncDetails.textContent = source === "prozorro"
+    ? "requesting the official public API"
+    : "validating and resolving entities";
 
   try {
     const result = await request("/sync-runs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: "fixtures" }),
+      body: JSON.stringify({ source, limit: 6 }),
     });
     elements.syncStatus.textContent = result.status;
     elements.syncDetails.textContent = `${result.records_created} created · ${result.records_updated} updated`;
-    elements.syncButton.querySelector("span").textContent = "Run sync again";
+    label.textContent = source === "prozorro" ? "Refresh live Prozorro" : "Run demo sync again";
     await loadDashboard({ quiet: true });
-    showToast(`Sync completed: ${result.records_created} created, ${result.records_updated} updated.`);
+    const sourceLabel = source === "prozorro" ? "Prozorro" : "Demo";
+    showToast(`${sourceLabel} sync: ${result.records_created} created, ${result.records_updated} updated.`);
   } catch (error) {
     elements.syncStatus.textContent = "Failed";
     elements.syncDetails.textContent = error.message;
-    elements.syncButton.querySelector("span").textContent = originalLabel;
+    label.textContent = originalLabel;
     showToast(error.message, true);
   } finally {
     elements.syncButton.disabled = false;
+    elements.liveSyncButton.disabled = false;
   }
 }
 
-elements.syncButton.addEventListener("click", runSync);
+elements.syncButton.addEventListener("click", () => runSync("fixtures", elements.syncButton));
+elements.liveSyncButton.addEventListener("click", () => runSync("prozorro", elements.liveSyncButton));
 elements.refreshButton.addEventListener("click", () => loadDashboard());
 elements.organizationSearch.addEventListener("input", renderOrganizations);
 elements.organizationList.addEventListener("click", (event) => {

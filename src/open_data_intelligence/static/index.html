@@ -42,11 +42,14 @@
             <span>Load demo dataset</span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </button>
+          <button id="liveSyncButton" class="secondary-button">
+            <span>Load live Prozorro</span>
+          </button>
           <button id="refreshButton" class="secondary-button">Refresh dashboard</button>
         </div>
       </div>
       <div class="pipeline-card" aria-label="Pipeline stages">
-        <div class="pipeline-step"><span>01</span><div><b>Ingest</b><small>validated fixtures</small></div></div>
+        <div class="pipeline-step"><span>01</span><div><b>Ingest</b><small>fixtures or live API</small></div></div>
         <div class="pipeline-line"></div>
         <div class="pipeline-step"><span>02</span><div><b>Resolve</b><small>stable entities</small></div></div>
         <div class="pipeline-line"></div>
@@ -73,7 +76,7 @@
       <article class="metric-card">
         <span>Last sync</span>
         <strong id="syncStatus" class="status-text">Not run</strong>
-        <small id="syncDetails">load fixtures to begin</small>
+        <small id="syncDetails">choose fixture or live source</small>
       </article>
     </section>
 

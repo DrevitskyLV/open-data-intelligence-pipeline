@@ -56,6 +56,10 @@ def _upsert_organization(db: Session, payload: OrganizationInput) -> Organizatio
 
 def ingest_fixture(db: Session, path: Path | None = None) -> IngestionResult:
     records = load_fixture_records(path)
+    return ingest_records(db, records)
+
+
+def ingest_records(db: Session, records: list[ProcurementInput]) -> IngestionResult:
     created = 0
     updated = 0
 

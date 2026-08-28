@@ -1,4 +1,9 @@
+import pytest
 from fastapi.testclient import TestClient
+
+import open_data_intelligence.api as api_module
+from open_data_intelligence.schemas import ProcurementInput
+from open_data_intelligence.services.ingestion import load_fixture_records
 
 
 def run_sync(client: TestClient) -> dict:
@@ -18,6 +23,27 @@ def test_dashboard_is_available(client: TestClient) -> None:
     assert response.status_code == 200
     assert "Open Data Intelligence" in response.text
     assert "Load demo dataset" in response.text
+    assert "Load live Prozorro" in response.text
+
+
+def test_live_prozorro_sync_uses_connector(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source_record = load_fixture_records()[0]
+    live_record = ProcurementInput.model_validate(
+        {**source_record.model_dump(), "external_id": "UA-LIVE-001:award-001"}
+    )
+
+    async def fake_fetch(limit: int) -> list[ProcurementInput]:
+        assert limit == 1
+        return [live_record]
+
+    monkeypatch.setattr(api_module, "fetch_prozorro_records", fake_fetch)
+    response = client.post("/api/v1/sync-runs", json={"source": "prozorro", "limit": 1})
+
+    assert response.status_code == 201
+    assert response.json()["source"] == "prozorro"
+    assert response.json()["records_created"] == 1
 
 
 def test_sync_run_can_be_polled(client: TestClient) -> None:
